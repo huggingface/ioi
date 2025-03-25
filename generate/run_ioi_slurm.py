@@ -14,9 +14,9 @@ MAX_CTX_LENGTH = None
 
 MODEL_CONFIGS = {}
 
-LOGS_DIR = "/fsx/hynek_kydlicek/logs/ioi-eval"
-SLURM_SCRIPT_DIR = "/fsx/hynek_kydlicek/slurm/ioi-eval/output"
-UV_ENV = "/fsx/hynek_kydlicek/projects/ioi-leaderboard/ioi-eval"
+LOGS_DIR = "/fsx/lewis/git/hf/ioi/logs"
+SLURM_SCRIPT_DIR = "/fsx/lewis/git/hf/ioi/data"
+UV_ENV = "/fsx/lewis/git/hf/ioi/ioi"
 
 
 def get_concurrency(model_name: str, concurrency: int) -> int:
@@ -139,7 +139,7 @@ export GLOO_SOCKET_IFNAME="enp71s0"
 export NCCL_SOCKET_IFNAME="enp71s0"
 
 # Evaluation script path
-EVAL_SCRIPT_PATH="/fsx/hynek_kydlicek/projects/ioi/generate/evaluate.py"
+EVAL_SCRIPT_PATH="/fsx/lewis/git/hf/ioi/generate/evaluate.py"
 
 module load cuda/12.4
 source ~/.bashrc
