@@ -62,7 +62,7 @@ class IOIEvaluator:
             logger.warning("Running in dry-run mode - no actual LLM calls will be made")
 
         # Create results directory
-        self.model_dir = Path("results") / self.get_model_name()
+        self.model_dir = Path("results") / self.get_model_name() if self.hub_dataset_id is None else Path("results") / self.hub_dataset_id
         self.model_dir.mkdir(parents=True, exist_ok=True)
         
         # File path for the single JSONL file
