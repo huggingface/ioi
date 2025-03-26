@@ -71,8 +71,17 @@ For locally deployed models using SGLang, you can use the provided scripts:
 For HPC environments with SLURM, use `run_ioi_slurm.py` to evaluate open models:
 
 ```bash
-python run_ioi_slurm.py --model "MODEL_PATH" --concurrency 30 --startup_delay 7200 --logs_dir "DIR_FOR_OUTPUT_LOGS" --slurm_dir "DIR_FOR_SLUR_SCRIPT" --uv_env "PATH_TO_UV_ENV" --eval_args "--org_id YOUR_ORG_ID"
+python run_ioi_slurm.py --model "MODEL_PATH" --concurrency 30 --startup_delay 7200 --logs_dir "DIR_FOR_OUTPUT_LOGS" --slurm_dir "DIR_FOR_SLUR_SCRIPT" --uv_env "PATH_TO_UV_ENV"
 ```
+
+By default, this will push the results to a Hub dataset under your namespace with repo ID `{hub_user}/ioi-eval-sglang_{model}`. Use the `--eval_args` to specify the Hub dataset ID as follows:
+
+```shell
+python run_ioi_slurm.py --model "MODEL_PATH" --concurrency 30 --startup_delay 7200 --logs_dir "DIR_FOR_OUTPUT_LOGS" --slurm_dir "DIR_FOR_SLUR_SCRIPT" --uv_env "PATH_TO_UV_ENV" --eval_args "--hub_dataset_id {dataset_id}"
+```
+
+> [!NOTE]
+> The `--eval_args` flag can also be used to pass other arguments to the `evaluate.py` script.
 
 ## Output
 
