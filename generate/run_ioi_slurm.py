@@ -9,7 +9,7 @@ import logging
 
 logger = logging.getLogger(__name__)
 
-DEFAULT_TP = 16
+DEFAULT_TP = 8
 MAX_CTX_LENGTH = None
 
 MODEL_CONFIGS = {}

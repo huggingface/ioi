@@ -16,14 +16,14 @@ import aiofiles
 from litellm.utils import ModelResponse
 
 class IOIEvaluator:
-    def __init__(self, org_id: str, model_id: str, api_base: Optional[str] = None,  subset: Optional[str] = None,
+    def __init__(self, model_id: str, api_base: Optional[str] = None,  subset: Optional[str] = None,
                  num_generations: int = 50, num_retries: int = 10, 
                  concurrency: int = 10, num_problems: Optional[int] = None, 
                  last_subtask: bool = False, dry_run: bool = False,
                  override: bool = False, model_postfix: Optional[str] = None,
                  revision: Optional[str] = None, timeout: Optional[int] = 600,
-                 use_requests: bool = False, max_tokens: Optional[int] = None):
-        self.org_id = org_id
+                 use_requests: bool = False, max_tokens: Optional[int] = None, hub_dataset_id: Optional[str] = None):
+        self.hub_dataset_id = hub_dataset_id
         self.model_id = model_id
         self.api_base = api_base
         self.subset = subset
@@ -62,7 +62,7 @@ class IOIEvaluator:
             logger.warning("Running in dry-run mode - no actual LLM calls will be made")
 
         # Create results directory
-        self.model_dir = Path("results") / self.get_model_name()
+        self.model_dir = Path("results") / self.get_model_name() if self.hub_dataset_id is None else Path("results") / self.hub_dataset_id
         self.model_dir.mkdir(parents=True, exist_ok=True)
         
         # File path for the single JSONL file
@@ -96,7 +96,7 @@ class IOIEvaluator:
         results_dfs = []
         
         # Try loading from Hub
-        repo_name = f"{self.org_id}/{self.get_model_name()}"
+        repo_name = self.hub_dataset_id if self.hub_dataset_id is not None else self.get_model_name()
         try:
             logger.info(f"Attempting to load previous results from HuggingFace Hub: {repo_name}")
             dataset = load_dataset(repo_name, split="train")
@@ -593,8 +593,9 @@ int main() {
                 model_name = self.get_model_name()
                 
                 try:
-                    output_dataset.push_to_hub(f"{self.org_id}/{model_name}")
-                    logger.info(f"Pushed to hub: {self.org_id}/{model_name}")
+                    hub_dataset_id = self.hub_dataset_id if self.hub_dataset_id is not None else model_name
+                    output_dataset.push_to_hub(hub_dataset_id)
+                    logger.info(f"Pushed to hub: {hub_dataset_id}")
                 except Exception as e:
                     logger.error(f"Failed to push to hub: {str(e)}")
             else:
@@ -644,7 +645,6 @@ def main():
     
     import argparse
     parser = argparse.ArgumentParser(description="Evaluate LLMs on IOI problems")
-    parser.add_argument("--org_id", required=True, help="Organization ID")
     parser.add_argument("--model_id", required=True, help="Model ID")
     parser.add_argument("--api_base", help="API base URL for the model")
     parser.add_argument("--subset", default="test", help="IOI subset to generate solutions for (train or test)")
@@ -660,10 +660,10 @@ def main():
     parser.add_argument("--timeout", type=int, default=600, help="Timeout for the LLM call")
     parser.add_argument("--use_requests", action="store_true", default=False, help="Use requests instead of litellm")
     parser.add_argument("--max_tokens", type=int, default=None, help="Max tokens")
+    parser.add_argument("--hub_dataset_id", type=str, default=None, help="Hub dataset ID to push results to. If `None`, will push results to user's namespace.")
     args = parser.parse_args()
 
     evaluator = IOIEvaluator(
-        org_id=args.org_id,
         model_id=args.model_id,
         api_base=args.api_base,
         subset=args.subset,
@@ -678,7 +678,8 @@ def main():
         revision=args.revision,
         timeout=args.timeout,
         use_requests=args.use_requests,
-        max_tokens=args.max_tokens
+        max_tokens=args.max_tokens,
+        hub_dataset_id=args.hub_dataset_id
     )
     asyncio.run(evaluator.run_evaluation())
 
